@@ -511,19 +511,22 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                   <div className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider border-r">
                       Zeit
                   </div>
-                  {/* Mobile: Show only selected group */}
-                  {(mobileCourtGroup === 1 ? COURTS.slice(0, 2) : COURTS.slice(2, 4)).map(court => (
-                      <div key={court.id} className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 sm:last:border-r truncate">
-                          <span className="hidden sm:inline">{court.name}</span>
-                          <span className="sm:hidden">P{court.id}</span>
-                      </div>
-                  ))}
+                  {/* Mobile: Show only selected group (hidden on desktop) */}
+                  <div className="contents sm:hidden">
+                      {(mobileCourtGroup === 1 ? COURTS.slice(0, 2) : COURTS.slice(2, 4)).map(court => (
+                          <div key={court.id} className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 truncate">
+                              P{court.id}
+                          </div>
+                      ))}
+                  </div>
                   {/* Desktop: Show all courts (hidden on mobile) */}
-                  {COURTS.map(court => (
-                      <div key={`desktop-${court.id}`} className="hidden sm:block p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 truncate">
-                          {court.name}
-                      </div>
-                  ))}
+                  <div className="hidden sm:contents">
+                      {COURTS.map(court => (
+                          <div key={`desktop-${court.id}`} className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 truncate">
+                              {court.name}
+                          </div>
+                      ))}
+                  </div>
               </div>
 
               {/* Body */}
@@ -533,8 +536,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                           <div className="p-1 sm:p-2 text-center text-[10px] sm:text-sm text-gray-500 font-mono border-r flex items-center justify-center">
                               {hour.toString().padStart(2, '0')}:00
                           </div>
-                          {/* Mobile: Show only selected group */}
-                          {(mobileCourtGroup === 1 ? COURTS.slice(0, 2) : COURTS.slice(2, 4)).map((court, courtIndex) => {
+                          {/* Mobile: Show only selected group (hidden on desktop) */}
+                          <div className="contents sm:hidden">
+                              {(mobileCourtGroup === 1 ? COURTS.slice(0, 2) : COURTS.slice(2, 4)).map((court, courtIndex) => {
                               // Add data attribute to first cell for height measurement
                               const isFirstCell = hourIndex === 0 && courtIndex === 0;
                               const booking = getBooking(court.id, hour);
@@ -731,9 +735,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                       )}
                                   </div>
                               );
-                          })}
+                              })}
+                          </div>
                           {/* Desktop: Show all courts (hidden on mobile) */}
-                          {COURTS.map((court, courtIndex) => {
+                          <div className="hidden sm:contents">
+                              {COURTS.map((court, courtIndex) => {
                                   const booking = getBooking(court.id, hour);
                                   const blockInfo = getBookingBlockInfo(court.id, hour);
                                   const isMyBooking = booking?.userId === currentUser.id;
@@ -908,7 +914,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                           )}
                                       </div>
                                   );
-                          })}
+                              })}
+                          </div>
                       </div>
                   ))}
               </div>
