@@ -10,39 +10,70 @@ interface AdminPanelProps {
 export const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser }) => {
   const [users, setUsers] = useState<User[]>([]);
 
-  const fetchUsers = () => {
-    setUsers(StorageService.getUsers());
+  const fetchUsers = async () => {
+    try {
+      const usersList = await StorageService.getUsers();
+      setUsers(usersList);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
   };
 
   useEffect(() => {
     fetchUsers();
+    
+    // Subscribe to real-time updates if Firebase is configured
+    const unsubscribe = StorageService.subscribeToUsers((updatedUsers) => {
+      setUsers(updatedUsers);
+    });
+    
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
-  const handleStatusChange = (user: User, newStatus: AccountStatus) => {
-    const updatedUser = { ...user, status: newStatus };
-    StorageService.updateUser(updatedUser);
-    fetchUsers();
+  const handleStatusChange = async (user: User, newStatus: AccountStatus) => {
+    try {
+      const updatedUser = { ...user, status: newStatus };
+      await StorageService.updateUser(updatedUser);
+      // Real-time update will handle the state update
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Fehler beim Aktualisieren des Benutzerstatus.');
+    }
   };
 
-  const handleRoleChange = (user: User, newRole: UserRole) => {
+  const handleRoleChange = async (user: User, newRole: UserRole) => {
     if (user.id === currentUser.id && newRole !== UserRole.ADMIN) {
       if (!confirm('Sie ändern Ihre eigene Rolle. Möchten Sie fortfahren? Sie könnten dadurch Admin-Rechte verlieren.')) {
         return;
       }
     }
-    const updatedUser = { ...user, role: newRole };
-    StorageService.updateUser(updatedUser);
-    fetchUsers();
+    try {
+      const updatedUser = { ...user, role: newRole };
+      await StorageService.updateUser(updatedUser);
+      // Real-time update will handle the state update
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      alert('Fehler beim Aktualisieren der Benutzerrolle.');
+    }
   };
 
-  const handleDeleteUser = (user: User) => {
+  const handleDeleteUser = async (user: User) => {
     if (user.id === currentUser.id) {
       alert('Sie können sich selbst nicht löschen.');
       return;
     }
     if (confirm(`Möchten Sie ${user.fullName} wirklich löschen? Alle Buchungen dieses Benutzers werden ebenfalls gelöscht.`)) {
-      StorageService.removeUser(user.id);
-      fetchUsers();
+      try {
+        await StorageService.removeUser(user.id);
+        // Real-time update will handle the state update
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Fehler beim Löschen des Benutzers.');
+      }
     }
   };
 
