@@ -475,8 +475,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
       )}
 
       {/* Grid - Responsive Wrapper */}
-      <div className={`overflow-x-auto bg-white rounded-lg shadow border border-gray-200 ${moveSourceBooking ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}>
-          <div className="min-w-[320px] sm:min-w-[600px] md:min-w-full">
+      <div className={`overflow-x-auto bg-white rounded-lg shadow border border-gray-200 -mx-4 sm:mx-0 sm:rounded-lg ${moveSourceBooking ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}>
+          <div className="min-w-[280px] sm:min-w-[600px] md:min-w-full">
               {/* Header */}
               <div className="grid grid-cols-5 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <div className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider border-r">
