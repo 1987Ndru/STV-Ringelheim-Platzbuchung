@@ -21,9 +21,11 @@ const App: React.FC = () => {
   const [loginError, setLoginError] = useState('');
 
   // Register Form State
-  const [regName, setRegName] = useState('');
+  const [regFirstName, setRegFirstName] = useState('');
+  const [regLastName, setRegLastName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPass, setRegPass] = useState('');
+  const [regPassConfirm, setRegPassConfirm] = useState('');
   const [regError, setRegError] = useState('');
   const [regSuccess, setRegSuccess] = useState('');
 
@@ -129,6 +131,44 @@ const App: React.FC = () => {
     setRegError('');
     setRegSuccess('');
 
+    // Validierung: Alle Felder müssen ausgefüllt sein
+    if (!regFirstName.trim()) {
+      setRegError('Bitte geben Sie Ihren Vornamen ein.');
+      return;
+    }
+
+    if (!regLastName.trim()) {
+      setRegError('Bitte geben Sie Ihren Nachnamen ein.');
+      return;
+    }
+
+    if (!regEmail.trim()) {
+      setRegError('Bitte geben Sie Ihre E-Mail-Adresse ein.');
+      return;
+    }
+
+    if (!regPass) {
+      setRegError('Bitte geben Sie ein Passwort ein.');
+      return;
+    }
+
+    if (!regPassConfirm) {
+      setRegError('Bitte bestätigen Sie Ihr Passwort.');
+      return;
+    }
+
+    // Validierung: Passwörter müssen übereinstimmen
+    if (regPass !== regPassConfirm) {
+      setRegError('Die Passwörter stimmen nicht überein. Bitte versuchen Sie es erneut.');
+      return;
+    }
+
+    // Validierung: Passwort sollte mindestens 6 Zeichen lang sein
+    if (regPass.length < 6) {
+      setRegError('Das Passwort muss mindestens 6 Zeichen lang sein.');
+      return;
+    }
+
     if (StorageService.findUserByEmail(regEmail)) {
       setRegError('Diese E-Mail wird bereits verwendet.');
       return;
@@ -136,8 +176,8 @@ const App: React.FC = () => {
 
     const newUser: User = {
       id: crypto.randomUUID(),
-      email: regEmail,
-      fullName: regName,
+      email: regEmail.trim(),
+      fullName: `${regFirstName.trim()} ${regLastName.trim()}`,
       password: regPass,
       role: UserRole.MEMBER,
       status: AccountStatus.PENDING
@@ -145,9 +185,11 @@ const App: React.FC = () => {
 
     StorageService.saveUser(newUser);
     setRegSuccess('Registrierung erfolgreich! Bitte warten Sie auf die Freischaltung durch den Admin.');
-    setRegName('');
+    setRegFirstName('');
+    setRegLastName('');
     setRegEmail('');
     setRegPass('');
+    setRegPassConfirm('');
   };
 
   const handleLogout = () => {
@@ -252,41 +294,98 @@ const App: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleRegister}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Vollständiger Name</label>
-              <input
-                type="text"
-                required
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-                className="bg-white mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-tennis-500 focus:border-tennis-500 sm:text-sm"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Vorname <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={regFirstName}
+                  onChange={(e) => setRegFirstName(e.target.value)}
+                  className="bg-white mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-tennis-500 focus:border-tennis-500 sm:text-sm"
+                  placeholder="Max"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Nachname <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={regLastName}
+                  onChange={(e) => setRegLastName(e.target.value)}
+                  className="bg-white mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-tennis-500 focus:border-tennis-500 sm:text-sm"
+                  placeholder="Mustermann"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">E-Mail Adresse</label>
+              <label className="block text-sm font-medium text-gray-700">
+                E-Mail Adresse <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
                 required
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
                 className="bg-white mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-tennis-500 focus:border-tennis-500 sm:text-sm"
+                placeholder="max.mustermann@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Passwort</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Passwort <span className="text-red-500">*</span>
+              </label>
               <input
                 type="password"
                 required
                 value={regPass}
                 onChange={(e) => setRegPass(e.target.value)}
                 className="bg-white mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-tennis-500 focus:border-tennis-500 sm:text-sm"
+                placeholder="Mindestens 6 Zeichen"
+                minLength={6}
               />
+              <p className="mt-1 text-xs text-gray-500">Mindestens 6 Zeichen</p>
             </div>
 
-            {regError && <div className="text-red-600 text-sm">{regError}</div>}
-            {regSuccess && <div className="text-green-600 text-sm bg-green-50 p-2 rounded">{regSuccess}</div>}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Passwort bestätigen <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                required
+                value={regPassConfirm}
+                onChange={(e) => setRegPassConfirm(e.target.value)}
+                className={`bg-white mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-tennis-500 focus:border-tennis-500 sm:text-sm ${
+                  regPassConfirm && regPass !== regPassConfirm ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Passwort wiederholen"
+              />
+              {regPassConfirm && regPass !== regPassConfirm && (
+                <p className="mt-1 text-xs text-red-600">Die Passwörter stimmen nicht überein.</p>
+              )}
+              {regPassConfirm && regPass === regPassConfirm && regPass.length >= 6 && (
+                <p className="mt-1 text-xs text-green-600">✓ Passwörter stimmen überein.</p>
+              )}
+            </div>
+
+            {regError && (
+              <div className="text-red-600 text-sm bg-red-50 p-3 rounded border border-red-200">
+                {regError}
+              </div>
+            )}
+            {regSuccess && (
+              <div className="text-green-600 text-sm bg-green-50 p-3 rounded border border-green-200">
+                {regSuccess}
+              </div>
+            )}
 
             <div className="flex flex-col space-y-3">
               <Button type="submit" className="w-full">Registrieren</Button>
