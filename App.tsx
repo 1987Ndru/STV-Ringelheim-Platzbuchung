@@ -12,6 +12,9 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentView, setCurrentView] = useState<View>('LOGIN');
   
+  // Auto-logout warning state
+  const [showLogoutWarning, setShowLogoutWarning] = useState(false);
+  
   // Login Form State
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPass, setLoginPass] = useState('');
@@ -34,24 +37,29 @@ const App: React.FC = () => {
 
   // Auto-Logout nach 10 Minuten Inaktivität
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setShowLogoutWarning(false);
+      return;
+    }
 
     const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 Minuten in Millisekunden
     const WARNING_TIME = 1 * 60 * 1000; // 1 Minute vor Logout warnen
     let inactivityTimer: NodeJS.Timeout;
     let warningTimer: NodeJS.Timeout;
-    let warningShown = false;
+    let mousemoveTimeout: NodeJS.Timeout;
 
     const resetTimer = () => {
-      // Timer zurücksetzen
+      // Alle Timer zurücksetzen
       clearTimeout(inactivityTimer);
       clearTimeout(warningTimer);
-      warningShown = false;
+      clearTimeout(mousemoveTimeout);
+      
+      // Warnung ausblenden, wenn Aktivität erkannt wird
+      setShowLogoutWarning(false);
 
-      // Warnung 1 Minute vor Logout anzeigen
+      // Warnung 1 Minute vor Logout anzeigen (nicht-blockierend)
       warningTimer = setTimeout(() => {
-        warningShown = true;
-        alert('Sie werden in 1 Minute automatisch ausgeloggt, wenn keine Aktivität erkannt wird.');
+        setShowLogoutWarning(true);
       }, INACTIVITY_TIMEOUT - WARNING_TIME);
 
       // Logout nach vollständiger Inaktivität
@@ -62,11 +70,11 @@ const App: React.FC = () => {
         setCurrentView('LOGIN');
         setLoginEmail('');
         setLoginPass('');
+        setShowLogoutWarning(false);
       }, INACTIVITY_TIMEOUT);
     };
 
     // Debounced Funktion für mousemove (Performance-Optimierung)
-    let mousemoveTimeout: NodeJS.Timeout;
     const debouncedMousemove = () => {
       clearTimeout(mousemoveTimeout);
       mousemoveTimeout = setTimeout(() => {
@@ -294,6 +302,29 @@ const App: React.FC = () => {
 
   const renderDashboard = () => (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Auto-Logout Warnung */}
+      {showLogoutWarning && (
+        <div className="bg-yellow-500 border-b-4 border-yellow-600 text-white px-4 py-3 shadow-lg relative z-50">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="font-semibold">Sie werden in 1 Minute automatisch ausgeloggt, wenn keine Aktivität erkannt wird.</span>
+            </div>
+            <button
+              onClick={() => setShowLogoutWarning(false)}
+              className="ml-4 text-white hover:text-yellow-200 transition-colors"
+              aria-label="Warnung schließen"
+            >
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Navigation */}
       <nav className="bg-tennis-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
