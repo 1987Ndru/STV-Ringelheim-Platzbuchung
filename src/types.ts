@@ -26,8 +26,11 @@ export enum VMType {
 }
 
 export interface User {
-  id: string;
+  id?: string;
+  _id?: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   fullName: string;
   role: UserRole;
   status: AccountStatus;

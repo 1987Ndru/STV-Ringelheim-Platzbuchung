@@ -22,15 +22,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser }) => {
   useEffect(() => {
     fetchUsers();
     
-    // Subscribe to real-time updates if Firebase is configured
-    const unsubscribe = StorageService.subscribeToUsers((updatedUsers) => {
-      setUsers(updatedUsers);
-    });
+    // Poll for updates every 5 seconds (could be improved with WebSockets)
+    const interval = setInterval(fetchUsers, 5000);
     
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      clearInterval(interval);
     };
   }, []);
 

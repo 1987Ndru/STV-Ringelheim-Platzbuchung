@@ -1,68 +1,52 @@
 import { User, Booking, UserRole, AccountStatus, Court } from '../types';
-import { FirebaseStorageService } from './firebaseStorage';
+import { apiService } from './api';
 
 const USERS_KEY = 'stv_users';
 const BOOKINGS_KEY = 'stv_bookings';
 const CURRENT_USER_KEY = 'stv_current_user';
 
-// Check if Firebase is configured
-const isFirebaseConfigured = (): boolean => {
-  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
-  return apiKey && apiKey !== 'your-api-key' && apiKey !== '';
+// Check if API is configured
+const isAPIConfigured = (): boolean => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  return apiUrl && apiUrl !== '';
 };
-
-// Initial Data Seeding
-const seedData = () => {
-  if (!localStorage.getItem(USERS_KEY)) {
-    const admin: User = {
-      id: 'admin-1',
-      email: 'admin@stv.de',
-      fullName: 'Vorstand (Admin)',
-      role: UserRole.ADMIN,
-      status: AccountStatus.APPROVED,
-      password: 'admin'
-    };
-    const trainer: User = {
-      id: 'trainer-1',
-      email: 'trainer@stv.de',
-      fullName: 'Coach Esume',
-      role: UserRole.TRAINER,
-      status: AccountStatus.APPROVED,
-      password: 'coach'
-    };
-    const demoUser: User = {
-      id: 'user-1',
-      email: 'demo@stv.de',
-      fullName: 'Max Mustermann',
-      role: UserRole.MEMBER,
-      status: AccountStatus.APPROVED, // Pre-approved for testing
-      password: 'demo'
-    };
-    localStorage.setItem(USERS_KEY, JSON.stringify([admin, trainer, demoUser]));
-  }
-  if (!localStorage.getItem(BOOKINGS_KEY)) {
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify([]));
-  }
-};
-
-seedData();
 
 export const StorageService = {
   // ============ USERS ============
   
   getUsers: async (): Promise<User[]> => {
-    if (isFirebaseConfigured()) {
-      return await FirebaseStorageService.getUsers();
+    if (isAPIConfigured()) {
+      try {
+        const users = await apiService.getUsers();
+        return users.map((u: any) => ({
+          ...u,
+          id: u.id || u._id
+        }));
+      } catch (error) {
+        console.error('Error fetching users from API:', error);
+        // Fallback to localStorage
+        return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+      }
     }
     // Fallback to localStorage
     return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
   },
 
   saveUser: async (user: User): Promise<void> => {
-    if (isFirebaseConfigured()) {
-      const newId = await FirebaseStorageService.saveUser(user);
-      user.id = newId;
-      return;
+    if (isAPIConfigured()) {
+      try {
+        await apiService.register({
+          firstName: user.firstName || user.fullName.split(' ')[0],
+          lastName: user.lastName || user.fullName.split(' ').slice(1).join(' '),
+          email: user.email,
+          password: user.password || '',
+          passwordConfirm: user.password || ''
+        });
+        return;
+      } catch (error) {
+        console.error('Error saving user to API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
@@ -71,9 +55,20 @@ export const StorageService = {
   },
 
   updateUser: async (updatedUser: User): Promise<void> => {
-    if (isFirebaseConfigured()) {
-      await FirebaseStorageService.updateUser(updatedUser);
-      return;
+    if (isAPIConfigured()) {
+      try {
+        const userId = updatedUser.id || updatedUser._id;
+        if (updatedUser.status) {
+          await apiService.updateUserStatus(userId!, updatedUser.status);
+        }
+        if (updatedUser.role) {
+          await apiService.updateUserRole(userId!, updatedUser.role);
+        }
+        return;
+      } catch (error) {
+        console.error('Error updating user in API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
@@ -85,9 +80,14 @@ export const StorageService = {
   },
 
   removeUser: async (userId: string): Promise<void> => {
-    if (isFirebaseConfigured()) {
-      await FirebaseStorageService.removeUser(userId);
-      return;
+    if (isAPIConfigured()) {
+      try {
+        await apiService.deleteUser(userId);
+        return;
+      } catch (error) {
+        console.error('Error deleting user from API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
@@ -100,8 +100,16 @@ export const StorageService = {
   },
 
   findUserByEmail: async (email: string): Promise<User | undefined> => {
-    if (isFirebaseConfigured()) {
-      return await FirebaseStorageService.findUserByEmail(email);
+    if (isAPIConfigured()) {
+      try {
+        const users = await apiService.getUsers();
+        return users.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+      } catch (error) {
+        console.error('Error finding user in API:', error);
+        // Fallback to localStorage
+        const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+        return users.find((u: User) => u.email.toLowerCase() === email.toLowerCase());
+      }
     }
     // Fallback to localStorage
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
@@ -110,19 +118,37 @@ export const StorageService = {
 
   // ============ BOOKINGS ============
 
-  getBookings: async (): Promise<Booking[]> => {
-    if (isFirebaseConfigured()) {
-      return await FirebaseStorageService.getBookings();
+  getBookings: async (date?: string): Promise<Booking[]> => {
+    if (isAPIConfigured()) {
+      try {
+        const bookings = await apiService.getBookings(date);
+        return bookings.map((b: any) => ({
+          ...b,
+          id: b.id || b._id
+        }));
+      } catch (error) {
+        console.error('Error fetching bookings from API:', error);
+        // Fallback to localStorage
+        const allBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+        return date ? allBookings.filter((b: Booking) => b.date === date) : allBookings;
+      }
     }
     // Fallback to localStorage
-    return JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+    const allBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+    return date ? allBookings.filter((b: Booking) => b.date === date) : allBookings;
   },
 
   addBooking: async (booking: Booking): Promise<void> => {
-    if (isFirebaseConfigured()) {
-      const newId = await FirebaseStorageService.addBooking(booking);
-      booking.id = newId;
-      return;
+    if (isAPIConfigured()) {
+      try {
+        const { id, ...bookingData } = booking;
+        const result = await apiService.createBooking(bookingData);
+        booking.id = result.id || result._id;
+        return;
+      } catch (error) {
+        console.error('Error creating booking in API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     const bookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
@@ -131,9 +157,16 @@ export const StorageService = {
   },
 
   updateBooking: async (updatedBooking: Booking): Promise<void> => {
-    if (isFirebaseConfigured()) {
-      await FirebaseStorageService.updateBooking(updatedBooking);
-      return;
+    if (isAPIConfigured()) {
+      try {
+        const bookingId = updatedBooking.id || updatedBooking._id;
+        const { id, _id, ...bookingData } = updatedBooking;
+        await apiService.updateBooking(bookingId!, bookingData);
+        return;
+      } catch (error) {
+        console.error('Error updating booking in API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     const bookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
@@ -145,9 +178,14 @@ export const StorageService = {
   },
 
   removeBooking: async (bookingId: string): Promise<void> => {
-    if (isFirebaseConfigured()) {
-      await FirebaseStorageService.removeBooking(bookingId);
-      return;
+    if (isAPIConfigured()) {
+      try {
+        await apiService.deleteBooking(bookingId);
+        return;
+      } catch (error) {
+        console.error('Error deleting booking from API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     let bookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
@@ -156,36 +194,43 @@ export const StorageService = {
   },
 
   // ============ REAL-TIME SUBSCRIPTIONS ============
+  // Note: Real-time updates would require WebSockets or polling
+  // For now, we'll use polling in the components
 
   subscribeToUsers: (callback: (users: User[]) => void): (() => void) | null => {
-    if (isFirebaseConfigured()) {
-      return FirebaseStorageService.subscribeToUsers(callback);
-    }
-    // Fallback: no real-time updates with localStorage
+    // Polling implementation could be added here
     return null;
   },
 
   subscribeToBookings: (callback: (bookings: Booking[]) => void): (() => void) | null => {
-    if (isFirebaseConfigured()) {
-      return FirebaseStorageService.subscribeToBookings(callback);
-    }
-    // Fallback: no real-time updates with localStorage
+    // Polling implementation could be added here
     return null;
   },
 
   subscribeToBookingsByDate: (date: string, callback: (bookings: Booking[]) => void): (() => void) | null => {
-    if (isFirebaseConfigured()) {
-      return FirebaseStorageService.subscribeToBookingsByDate(date, callback);
-    }
-    // Fallback: no real-time updates with localStorage
+    // Polling implementation could be added here
     return null;
   },
 
   // ============ AUTH HELPERS ============
   
   login: async (email: string, password: string): Promise<User | null> => {
-    if (isFirebaseConfigured()) {
-      return await FirebaseStorageService.login(email, password);
+    if (isAPIConfigured()) {
+      try {
+        const result = await apiService.login(email, password);
+        if (result.user) {
+          const user = {
+            ...result.user,
+            id: result.user.id || result.user._id
+          };
+          localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+          return user as User;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error logging in via API:', error);
+        throw error;
+      }
     }
     // Fallback to localStorage
     const user = await StorageService.findUserByEmail(email);
@@ -197,19 +242,13 @@ export const StorageService = {
   },
 
   logout: (): void => {
-    if (isFirebaseConfigured()) {
-      FirebaseStorageService.logout();
-      return;
+    if (isAPIConfigured()) {
+      apiService.logout();
     }
-    // Fallback to localStorage
     localStorage.removeItem(CURRENT_USER_KEY);
   },
 
   getCurrentUser: (): User | null => {
-    if (isFirebaseConfigured()) {
-      return FirebaseStorageService.getCurrentUser();
-    }
-    // Fallback to localStorage
     const data = localStorage.getItem(CURRENT_USER_KEY);
     return data ? JSON.parse(data) : null;
   }

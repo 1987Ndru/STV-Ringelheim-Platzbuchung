@@ -54,9 +54,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
   useEffect(() => {
     const loadBookings = async () => {
       try {
-        const allBookings = await StorageService.getBookings();
-        // Filter by selected date
-        const filteredBookings = allBookings.filter(b => b.date === selectedDate);
+        // Get bookings filtered by date directly from API
+        const filteredBookings = await StorageService.getBookings(selectedDate);
         setBookings(filteredBookings);
       } catch (error) {
         console.error('Error loading bookings:', error);
@@ -65,15 +64,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
     
     loadBookings();
     
-    // Subscribe to real-time updates for the selected date
-    const unsubscribe = StorageService.subscribeToBookingsByDate(selectedDate, (updatedBookings) => {
-      setBookings(updatedBookings);
-    });
+    // Poll for updates every 5 seconds (could be improved with WebSockets)
+    const interval = setInterval(loadBookings, 5000);
     
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      clearInterval(interval);
     };
   }, [selectedDate]);
 
