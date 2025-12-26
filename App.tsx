@@ -149,13 +149,6 @@ const App: React.FC = () => {
                 </Button>
               </div>
             </div>
-            
-            <div className="mt-8 pt-6 border-t border-gray-200">
-               <div className="text-xs text-gray-400 flex justify-between">
-                 <span>Demo Admin: admin@stv.de / admin</span>
-                 <span>Demo User: demo@stv.de / demo</span>
-               </div>
-            </div>
           </div>
         </div>
       </div>
