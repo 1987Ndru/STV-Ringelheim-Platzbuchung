@@ -1,0 +1,5 @@
+{
+  "name": "STV Ringelheim Court Booking",
+  "description": "Exklusive Tennisplatz-Buchungsplattform für den STV Ringelheim. Mitgliederverwaltung, Admin-Freigabe und intelligente Buchungsregeln (Mo-Fr Limitierung, 24/7 Zugang).",
+  "requestFramePermissions": []
+}
