@@ -37,10 +37,24 @@ const App: React.FC = () => {
     if (!currentUser) return;
 
     const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 Minuten in Millisekunden
+    const WARNING_TIME = 1 * 60 * 1000; // 1 Minute vor Logout warnen
     let inactivityTimer: NodeJS.Timeout;
+    let warningTimer: NodeJS.Timeout;
+    let warningShown = false;
 
     const resetTimer = () => {
+      // Timer zurücksetzen
       clearTimeout(inactivityTimer);
+      clearTimeout(warningTimer);
+      warningShown = false;
+
+      // Warnung 1 Minute vor Logout anzeigen
+      warningTimer = setTimeout(() => {
+        warningShown = true;
+        alert('Sie werden in 1 Minute automatisch ausgeloggt, wenn keine Aktivität erkannt wird.');
+      }, INACTIVITY_TIMEOUT - WARNING_TIME);
+
+      // Logout nach vollständiger Inaktivität
       inactivityTimer = setTimeout(() => {
         // User nach 10 Minuten Inaktivität ausloggen
         StorageService.logout();
@@ -51,12 +65,24 @@ const App: React.FC = () => {
       }, INACTIVITY_TIMEOUT);
     };
 
+    // Debounced Funktion für mousemove (Performance-Optimierung)
+    let mousemoveTimeout: NodeJS.Timeout;
+    const debouncedMousemove = () => {
+      clearTimeout(mousemoveTimeout);
+      mousemoveTimeout = setTimeout(() => {
+        resetTimer();
+      }, 1000); // Nur alle 1 Sekunde auslösen, auch wenn Maus bewegt wird
+    };
+
     // Timer beim Login starten
     resetTimer();
 
     // Event-Listener für User-Aktivität
-    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    // mousemove separat behandeln mit Debouncing
+    window.addEventListener('mousemove', debouncedMousemove, true);
     
+    // Andere Events normal behandeln
+    const activityEvents = ['mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
     activityEvents.forEach(event => {
       window.addEventListener(event, resetTimer, true);
     });
@@ -64,6 +90,9 @@ const App: React.FC = () => {
     // Cleanup
     return () => {
       clearTimeout(inactivityTimer);
+      clearTimeout(warningTimer);
+      clearTimeout(mousemoveTimeout);
+      window.removeEventListener('mousemove', debouncedMousemove, true);
       activityEvents.forEach(event => {
         window.removeEventListener(event, resetTimer, true);
       });
