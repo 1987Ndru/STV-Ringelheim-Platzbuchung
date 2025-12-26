@@ -32,6 +32,44 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Auto-Logout nach 10 Minuten Inaktivität
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 Minuten in Millisekunden
+    let inactivityTimer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        // User nach 10 Minuten Inaktivität ausloggen
+        StorageService.logout();
+        setCurrentUser(null);
+        setCurrentView('LOGIN');
+        setLoginEmail('');
+        setLoginPass('');
+      }, INACTIVITY_TIMEOUT);
+    };
+
+    // Timer beim Login starten
+    resetTimer();
+
+    // Event-Listener für User-Aktivität
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    activityEvents.forEach(event => {
+      window.addEventListener(event, resetTimer, true);
+    });
+
+    // Cleanup
+    return () => {
+      clearTimeout(inactivityTimer);
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, resetTimer, true);
+      });
+    };
+  }, [currentUser]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
