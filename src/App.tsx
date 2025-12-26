@@ -427,10 +427,17 @@ const App: React.FC = () => {
       {/* Navigation */}
       <nav className="bg-tennis-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center min-h-[4rem] sm:h-16 flex-wrap gap-2 sm:gap-0">
-            <div className="flex items-center flex-1 min-w-0">
-              <span className="text-white text-base sm:text-xl font-bold tracking-wider truncate">STV Ringelheim</span>
-              <div className="ml-2 sm:ml-4 lg:ml-10 flex items-baseline space-x-1 sm:space-x-4">
+          {/* Mobile Layout: 2 Zeilen */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center min-h-[8rem] sm:min-h-0 sm:h-16 gap-2 sm:gap-0 py-2 sm:py-0">
+            {/* Zeile 1 Mobile: Name zentriert oben */}
+            <div className="flex justify-center sm:justify-start sm:items-center sm:flex-1 sm:min-w-0 order-1 sm:order-none">
+              <span className="text-white text-base sm:text-xl font-bold tracking-wider">STV Ringelheim</span>
+            </div>
+            
+            {/* Zeile 2 Mobile: Links - Navigation, Rechts - Abmelden */}
+            <div className="flex justify-between items-center order-2 sm:order-none sm:flex sm:items-center sm:space-x-4">
+              {/* Links: Navigation Buttons */}
+              <div className="flex items-baseline space-x-1 sm:space-x-4 sm:ml-4 lg:ml-10">
                 <button
                   onClick={() => setCurrentView('DASHBOARD')}
                   className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap ${
@@ -450,10 +457,12 @@ const App: React.FC = () => {
                   </button>
                 )}
               </div>
-            </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <span className="text-tennis-100 text-xs sm:text-sm hidden sm:inline truncate max-w-[150px] lg:max-w-none">Hallo, {currentUser?.fullName}</span>
-              <Button variant="secondary" onClick={handleLogout} className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 bg-white whitespace-nowrap">Abmelden</Button>
+              
+              {/* Rechts: Abmelden Button */}
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <span className="text-tennis-100 text-xs sm:text-sm hidden sm:inline truncate max-w-[150px] lg:max-w-none">Hallo, {currentUser?.fullName}</span>
+                <Button variant="secondary" onClick={handleLogout} className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 bg-white whitespace-nowrap">Abmelden</Button>
+              </div>
             </div>
           </div>
         </div>
