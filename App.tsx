@@ -166,12 +166,12 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 w-full lg:w-1/2 bg-gray-50">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="text-center lg:text-left mb-6">
-             <h2 className="text-3xl font-extrabold text-tennis-900 tracking-tight">STV Ringelheim</h2>
-             <p className="mt-2 text-tennis-600 font-medium">Online Platzbuchung</p>
+             <h2 className="text-2xl sm:text-3xl font-extrabold text-tennis-900 tracking-tight">STV Ringelheim</h2>
+             <p className="mt-2 text-sm sm:text-base text-tennis-600 font-medium">Online Platzbuchung</p>
           </div>
 
           <div className="mt-8">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900">Anmelden</h2>
+            <h2 className="mb-4 sm:mb-6 text-xl sm:text-2xl font-bold text-gray-900">Anmelden</h2>
             <form className="space-y-6" onSubmit={handleLogin}>
               <div>
                 <label className="block text-sm font-medium text-gray-700">E-Mail Adresse</label>
@@ -243,8 +243,8 @@ const App: React.FC = () => {
   const renderRegister = () => (
     <div className="min-h-screen bg-tennis-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-extrabold text-tennis-900">Mitglied werden</h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-tennis-900 px-4">Mitglied werden</h2>
+        <p className="mt-2 text-center text-sm text-gray-600 px-4">
           Registrieren Sie sich, um Plätze zu buchen.
         </p>
       </div>
@@ -304,20 +304,20 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Auto-Logout Warnung */}
       {showLogoutWarning && (
-        <div className="bg-yellow-500 border-b-4 border-yellow-600 text-white px-4 py-3 shadow-lg relative z-50">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center">
-              <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <div className="bg-yellow-500 border-b-4 border-yellow-600 text-white px-3 sm:px-4 py-2 sm:py-3 shadow-lg relative z-50">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <div className="flex items-center flex-1 min-w-0">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              <span className="font-semibold">Sie werden in 1 Minute automatisch ausgeloggt, wenn keine Aktivität erkannt wird.</span>
+              <span className="text-xs sm:text-sm font-semibold leading-tight">Sie werden in 1 Minute automatisch ausgeloggt, wenn keine Aktivität erkannt wird.</span>
             </div>
             <button
               onClick={() => setShowLogoutWarning(false)}
-              className="ml-4 text-white hover:text-yellow-200 transition-colors"
+              className="ml-2 sm:ml-4 text-white hover:text-yellow-200 transition-colors flex-shrink-0 p-1 touch-manipulation"
               aria-label="Warnung schließen"
             >
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
@@ -327,14 +327,14 @@ const App: React.FC = () => {
       
       {/* Navigation */}
       <nav className="bg-tennis-700 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-white text-xl font-bold tracking-wider">STV Ringelheim</span>
-              <div className="ml-10 flex items-baseline space-x-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center min-h-[4rem] sm:h-16 flex-wrap gap-2 sm:gap-0">
+            <div className="flex items-center flex-1 min-w-0">
+              <span className="text-white text-base sm:text-xl font-bold tracking-wider truncate">STV Ringelheim</span>
+              <div className="ml-2 sm:ml-4 lg:ml-10 flex items-baseline space-x-1 sm:space-x-4">
                 <button
                   onClick={() => setCurrentView('DASHBOARD')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap ${
                     currentView === 'DASHBOARD' ? 'bg-tennis-800 text-white' : 'text-tennis-100 hover:bg-tennis-600'
                   }`}
                 >
@@ -343,19 +343,18 @@ const App: React.FC = () => {
                 {currentUser?.role === 'ADMIN' && (
                   <button
                     onClick={() => setCurrentView('ADMIN')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap ${
                       currentView === 'ADMIN' ? 'bg-tennis-800 text-white' : 'text-tennis-100 hover:bg-tennis-600'
                     }`}
                   >
                     Verwaltung
-                    {/* Badge could go here */}
                   </button>
                 )}
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-tennis-100 text-sm hidden sm:inline">Hallo, {currentUser?.fullName}</span>
-              <Button variant="secondary" onClick={handleLogout} className="text-xs px-2 py-1 bg-white">Abmelden</Button>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="text-tennis-100 text-xs sm:text-sm hidden sm:inline truncate max-w-[150px] lg:max-w-none">Hallo, {currentUser?.fullName}</span>
+              <Button variant="secondary" onClick={handleLogout} className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 bg-white whitespace-nowrap">Abmelden</Button>
             </div>
           </div>
         </div>
@@ -367,9 +366,9 @@ const App: React.FC = () => {
           <AdminPanel currentUser={currentUser} />
         ) : (
           <div className="h-full">
-             <div className="md:flex md:items-center md:justify-between mb-6">
+             <div className="md:flex md:items-center md:justify-between mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight sm:leading-7 text-gray-900 truncate">
                     Platzbelegung
                   </h2>
                 </div>

@@ -580,22 +580,24 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                               </div>
                                               
                                               {canModify && !moveSourceBooking && (
-                                                  <div className="absolute bottom-0.5 right-0.5 flex space-x-1 z-20">
+                                                  <div className="absolute bottom-0.5 right-0.5 flex space-x-0.5 sm:space-x-1 z-20">
                                                      <button 
                                                         onClick={(e) => { e.stopPropagation(); openEditModal(booking); }}
-                                                        className="bg-white text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm font-medium p-1 rounded hover:bg-gray-50 transition-colors"
+                                                        className="bg-white text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
                                                         title="Bearbeiten"
+                                                        aria-label="Bearbeiten"
                                                       >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                                                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                                         </svg>
                                                       </button>
                                                      <button 
                                                         onClick={(e) => { e.stopPropagation(); initMove(booking); }}
-                                                        className="bg-white text-blue-700 hover:text-blue-900 border border-gray-200 shadow-sm font-medium p-1 rounded hover:bg-gray-50 transition-colors"
+                                                        className="bg-white text-blue-700 hover:text-blue-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
                                                         title="Verschieben"
+                                                        aria-label="Verschieben"
                                                       >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                                                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" transform="rotate(45 10 10)" />
                                                         </svg>
                                                       </button>
@@ -604,10 +606,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                                           e.stopPropagation();
                                                           handleCancel(booking.id);
                                                         }}
-                                                        className="bg-white text-red-700 hover:text-red-900 border border-gray-200 shadow-sm font-medium p-1 rounded hover:bg-gray-50 transition-colors"
+                                                        className="bg-white text-red-700 hover:text-red-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
                                                         title="Stornieren"
+                                                        aria-label="Stornieren"
                                                       >
-                                                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                                                           </svg>
                                                       </button>
@@ -644,22 +647,24 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                               </div>
                                               
                                               {canModify && !moveSourceBooking && (
-                                                  <div className="absolute bottom-0.5 right-0.5 flex space-x-1 z-20">
+                                                  <div className="absolute bottom-0.5 right-0.5 flex space-x-0.5 sm:space-x-1 z-20">
                                                      <button 
                                                         onClick={(e) => { e.stopPropagation(); openEditModal(booking); }}
-                                                        className="bg-white text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm font-medium p-1 rounded hover:bg-gray-50 transition-colors"
+                                                        className="bg-white text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
                                                         title="Bearbeiten"
+                                                        aria-label="Bearbeiten"
                                                       >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                                                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                                         </svg>
                                                       </button>
                                                      <button 
                                                         onClick={(e) => { e.stopPropagation(); initMove(booking); }}
-                                                        className="bg-white text-blue-700 hover:text-blue-900 border border-gray-200 shadow-sm font-medium p-1 rounded hover:bg-gray-50 transition-colors"
+                                                        className="bg-white text-blue-700 hover:text-blue-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
                                                         title="Verschieben"
+                                                        aria-label="Verschieben"
                                                       >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                                                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" transform="rotate(45 10 10)" />
                                                         </svg>
                                                       </button>
@@ -668,10 +673,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                                           e.stopPropagation();
                                                           handleCancel(booking.id);
                                                         }}
-                                                        className="bg-white text-red-700 hover:text-red-900 border border-gray-200 shadow-sm font-medium p-1 rounded hover:bg-gray-50 transition-colors"
+                                                        className="bg-white text-red-700 hover:text-red-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
                                                         title="Stornieren"
+                                                        aria-label="Stornieren"
                                                       >
-                                                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                                                           </svg>
                                                       </button>
@@ -703,9 +709,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full max-h-[90vh] overflow-y-auto">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                <h3 className="text-base sm:text-lg leading-6 font-medium text-gray-900" id="modal-title">
                   {editingBookingId ? 'Buchung bearbeiten' : 'Platz buchen'}
                 </h3>
                 <div className="mt-2 space-y-3">
@@ -713,7 +719,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                     {COURTS.find(c => c.id === modalData.courtId)?.name}, {modalData.hour}:00 Uhr
                   </p>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="col-span-2 sm:col-span-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
                       <select 
@@ -845,17 +851,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                 </div>
               </div>
               <div className="bg-gray-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row-reverse gap-2 sm:gap-0">
-                <Button onClick={confirmBooking} className="w-full sm:ml-3 sm:w-auto">
+                <Button onClick={confirmBooking} className="w-full sm:ml-3 sm:w-auto text-sm sm:text-base px-4 py-2">
                   {editingBookingId ? 'Speichern' : 'Buchen'}
                 </Button>
                 
                 {editingBookingId && (
-                   <Button variant="danger" onClick={handleDeleteFromModal} className="w-full sm:ml-3 sm:w-auto">
+                   <Button variant="danger" onClick={handleDeleteFromModal} className="w-full sm:ml-3 sm:w-auto text-sm sm:text-base px-4 py-2">
                      Löschen
                    </Button>
                 )}
 
-                <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="mt-2 sm:mt-0 sm:ml-3 w-full sm:w-auto bg-white">
+                <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="w-full sm:ml-3 sm:w-auto bg-white text-sm sm:text-base px-4 py-2">
                   Abbrechen
                 </Button>
               </div>
