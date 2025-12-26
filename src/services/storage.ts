@@ -121,8 +121,8 @@ export const StorageService = {
 };
 
 export const COURTS: Court[] = [
-  { id: 1, name: 'Philippe-Chatrier' },
-  { id: 2, name: 'Suzanne-Lenglen' },
-  { id: 3, name: 'Simonne-Mathieu' },
-  { id: 4, name: 'Court 14' },
+  { id: 1, name: 'Platz 1' },
+  { id: 2, name: 'Platz 2' },
+  { id: 3, name: 'Platz 3' },
+  { id: 4, name: 'Platz 4' },
 ];
