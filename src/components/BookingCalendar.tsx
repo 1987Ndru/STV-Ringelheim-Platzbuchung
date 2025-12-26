@@ -52,25 +52,10 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
   });
 
   useEffect(() => {
-    const loadBookings = async () => {
-      try {
-        // Get bookings filtered by date directly from API
-        const filteredBookings = await StorageService.getBookings(selectedDate);
-        setBookings(filteredBookings);
-      } catch (error) {
-        console.error('Error loading bookings:', error);
-      }
-    };
-    
-    loadBookings();
-    
-    // Poll for updates every 5 seconds (could be improved with WebSockets)
-    const interval = setInterval(loadBookings, 5000);
-    
-    return () => {
-      clearInterval(interval);
-    };
-  }, [selectedDate]);
+    const allBookings = StorageService.getBookings();
+    const filteredBookings = allBookings.filter(b => b.date === selectedDate);
+    setBookings(filteredBookings);
+  }, [selectedDate, message]);
 
   // Measure actual row height on mount and resize
   useEffect(() => {
@@ -284,7 +269,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
       return null;
   };
 
-  const confirmBooking = async () => {
+  const confirmBooking = () => {
     if (!modalData) return;
 
     setMessage(null);
@@ -342,28 +327,23 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
         newBookings.push(bookingData);
     }
 
-    try {
-      if (editingBookingId) {
-          // Update single existing booking
-          await StorageService.updateBooking(newBookings[0]);
-          setMessage({ type: 'success', text: 'Buchung aktualisiert!' });
-      } else {
-          // Create new booking(s)
-          for (const booking of newBookings) {
-            await StorageService.addBooking(booking);
-          }
-          setMessage({ type: 'success', text: `${duration} Stunde(n) erfolgreich gebucht!` });
-      }
-      setIsModalOpen(false);
-      setTimeout(() => setMessage(null), 3000);
-      // Real-time update will handle the state update
-    } catch (error) {
-      console.error('Error saving booking:', error);
-      setMessage({ type: 'error', text: 'Fehler beim Speichern der Buchung.' });
+    if (editingBookingId) {
+        // Update single existing booking
+        StorageService.updateBooking(newBookings[0]);
+        setBookings(bookings.map(b => b.id === editingBookingId ? newBookings[0] : b));
+        setMessage({ type: 'success', text: 'Buchung aktualisiert!' });
+    } else {
+        // Create new booking(s)
+        newBookings.forEach(b => StorageService.addBooking(b));
+        setBookings([...bookings, ...newBookings]);
+        setMessage({ type: 'success', text: `${duration} Stunde(n) erfolgreich gebucht!` });
     }
+
+    setIsModalOpen(false);
+    setTimeout(() => setMessage(null), 3000);
   };
 
-  const handleCancel = async (bookingId: string) => {
+  const handleCancel = (bookingId: string) => {
       const bookingToDelete = bookings.find(b => b.id === bookingId);
       if (!bookingToDelete) return;
 
@@ -376,12 +356,12 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
         : 'Buchung wirklich löschen?';
       
       if (confirm(confirmMessage)) {
-        try {
           // Delete all bookings in the block
-          for (const blockBooking of blockBookings) {
-            await StorageService.removeBooking(blockBooking.id);
-          }
+          blockBookings.forEach(blockBooking => {
+              StorageService.removeBooking(blockBooking.id);
+          });
           
+          setBookings(prev => prev.filter(b => !blockBookings.some(bb => bb.id === b.id)));
           setMessage({ 
             type: 'success', 
             text: blockLength > 1 
@@ -393,11 +373,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
           if (moveSourceBooking && blockBookings.some(bb => bb.id === moveSourceBooking.id)) {
             setMoveSourceBooking(null); 
           }
-          // Real-time update will handle the state update
-        } catch (error) {
-          console.error('Error canceling booking:', error);
-          setMessage({ type: 'error', text: 'Fehler beim Stornieren der Buchung.' });
-        }
       }
   };
 
@@ -417,7 +392,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
     setMessage(null);
   };
 
-  const executeMove = async (targetCourtId: number, targetHour: number) => {
+  const executeMove = (targetCourtId: number, targetHour: number) => {
     if (!moveSourceBooking) return;
 
     // Check restrictions (1 hour check for move)
@@ -443,18 +418,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
       timestamp: Date.now()
     };
 
-    try {
-      await StorageService.removeBooking(moveSourceBooking.id);
-      await StorageService.addBooking(newBooking);
-      
-      setMoveSourceBooking(null);
-      setMessage({ type: 'success', text: 'Buchung verschoben!' });
-      setTimeout(() => setMessage(null), 3000);
-      // Real-time update will handle the state update
-    } catch (error) {
-      console.error('Error moving booking:', error);
-      setMessage({ type: 'error', text: 'Fehler beim Verschieben der Buchung.' });
-    }
+    StorageService.removeBooking(moveSourceBooking.id);
+    StorageService.addBooking(newBooking);
+    
+    setBookings(prev => {
+        const filtered = prev.filter(b => b.id !== moveSourceBooking.id);
+        return [...filtered, newBooking];
+    });
+    
+    setMoveSourceBooking(null);
+    setMessage({ type: 'success', text: 'Buchung verschoben!' });
+    setTimeout(() => setMessage(null), 3000);
   };
 
   return (

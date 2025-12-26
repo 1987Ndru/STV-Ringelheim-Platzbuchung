@@ -30,14 +30,11 @@ const App: React.FC = () => {
   const [regSuccess, setRegSuccess] = useState('');
 
   useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = StorageService.getCurrentUser();
-      if (storedUser) {
-        setCurrentUser(storedUser);
-        setCurrentView('DASHBOARD');
-      }
-    };
-    loadUser();
+    const storedUser = StorageService.getCurrentUser();
+    if (storedUser) {
+      setCurrentUser(storedUser);
+      setCurrentView('DASHBOARD');
+    }
   }, []);
 
   // Auto-Logout nach 10 Minuten Inaktivität
@@ -112,29 +109,24 @@ const App: React.FC = () => {
     };
   }, [currentUser]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    try {
-      const user = await StorageService.login(loginEmail, loginPass);
-      if (user) {
-        if (user.status !== AccountStatus.APPROVED) {
-          setLoginError('Ihr Konto wurde noch nicht vom Administrator freigeschaltet.');
-          StorageService.logout();
-          return;
-        }
-        setCurrentUser(user);
-        setCurrentView('DASHBOARD');
-      } else {
-        setLoginError('Ungültige E-Mail oder Passwort.');
+    const user = StorageService.login(loginEmail, loginPass);
+    if (user) {
+      if (user.status !== AccountStatus.APPROVED) {
+        setLoginError('Ihr Konto wurde noch nicht vom Administrator freigeschaltet.');
+        StorageService.logout();
+        return;
       }
-    } catch (error) {
-      setLoginError('Fehler beim Anmelden. Bitte versuchen Sie es erneut.');
-      console.error('Login error:', error);
+      setCurrentUser(user);
+      setCurrentView('DASHBOARD');
+    } else {
+      setLoginError('Ungültige E-Mail oder Passwort.');
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setRegError('');
     setRegSuccess('');
@@ -177,33 +169,28 @@ const App: React.FC = () => {
       return;
     }
 
-    try {
-      const existingUser = await StorageService.findUserByEmail(regEmail);
-      if (existingUser) {
-        setRegError('Diese E-Mail wird bereits verwendet.');
-        return;
-      }
-
-      const newUser: User = {
-        id: crypto.randomUUID(),
-        email: regEmail.trim(),
-        fullName: `${regFirstName.trim()} ${regLastName.trim()}`,
-        password: regPass,
-        role: UserRole.MEMBER,
-        status: AccountStatus.PENDING
-      };
-
-      await StorageService.saveUser(newUser);
-      setRegSuccess('Registrierung erfolgreich! Bitte warten Sie auf die Freischaltung durch den Admin.');
-      setRegFirstName('');
-      setRegLastName('');
-      setRegEmail('');
-      setRegPass('');
-      setRegPassConfirm('');
-    } catch (error) {
-      setRegError('Fehler bei der Registrierung. Bitte versuchen Sie es erneut.');
-      console.error('Registration error:', error);
+    const existingUser = StorageService.findUserByEmail(regEmail);
+    if (existingUser) {
+      setRegError('Diese E-Mail wird bereits verwendet.');
+      return;
     }
+
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      email: regEmail.trim(),
+      fullName: `${regFirstName.trim()} ${regLastName.trim()}`,
+      password: regPass,
+      role: UserRole.MEMBER,
+      status: AccountStatus.PENDING
+    };
+
+    StorageService.saveUser(newUser);
+    setRegSuccess('Registrierung erfolgreich! Bitte warten Sie auf die Freischaltung durch den Admin.');
+    setRegFirstName('');
+    setRegLastName('');
+    setRegEmail('');
+    setRegPass('');
+    setRegPassConfirm('');
   };
 
   const handleLogout = () => {
