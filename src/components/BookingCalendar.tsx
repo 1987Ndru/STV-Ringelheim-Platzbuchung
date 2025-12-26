@@ -29,6 +29,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
   const [modalData, setModalData] = useState<{ courtId: number, hour: number } | null>(null);
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
   
+  // Mobile: Court group selection (1-2 or 3-4)
+  const [mobileCourtGroup, setMobileCourtGroup] = useState<1 | 2>(1);
+  
   // Form State
   const [selectedType, setSelectedType] = useState<BookingType>(BookingType.FREE);
   const [duration, setDuration] = useState<number>(1); // New Duration State
@@ -474,18 +477,51 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
           </div>
       )}
 
+      {/* Mobile: Court Group Selector */}
+      <div className="sm:hidden mb-4 bg-white rounded-lg shadow border border-gray-200 p-2">
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setMobileCourtGroup(1)}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              mobileCourtGroup === 1
+                ? 'bg-tennis-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Platz 1 & 2
+          </button>
+          <button
+            onClick={() => setMobileCourtGroup(2)}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              mobileCourtGroup === 2
+                ? 'bg-tennis-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Platz 3 & 4
+          </button>
+        </div>
+      </div>
+
       {/* Grid - Responsive Wrapper */}
       <div className={`overflow-x-auto bg-white rounded-lg shadow border border-gray-200 -mx-4 sm:mx-0 sm:rounded-lg ${moveSourceBooking ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}>
           <div className="min-w-[280px] sm:min-w-[600px] md:min-w-full">
-              {/* Header */}
-              <div className="grid grid-cols-5 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+              {/* Header - Mobile: 3 cols (Zeit + 2 Plätze), Desktop: 5 cols (Zeit + 4 Plätze) */}
+              <div className="grid grid-cols-3 sm:grid-cols-5 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <div className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider border-r">
                       Zeit
                   </div>
-                  {COURTS.map(court => (
-                      <div key={court.id} className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 truncate">
+                  {/* Mobile: Show only selected group */}
+                  {(mobileCourtGroup === 1 ? COURTS.slice(0, 2) : COURTS.slice(2, 4)).map(court => (
+                      <div key={court.id} className="p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 sm:last:border-r truncate">
                           <span className="hidden sm:inline">{court.name}</span>
                           <span className="sm:hidden">P{court.id}</span>
+                      </div>
+                  ))}
+                  {/* Desktop: Show all courts (hidden on mobile) */}
+                  {COURTS.map(court => (
+                      <div key={`desktop-${court.id}`} className="hidden sm:block p-2 sm:p-3 text-center text-[10px] sm:text-xs font-semibold text-tennis-800 uppercase tracking-wider border-r last:border-r-0 truncate">
+                          {court.name}
                       </div>
                   ))}
               </div>
@@ -493,11 +529,12 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
               {/* Body */}
               <div className="divide-y divide-gray-100 relative" style={{ overflow: 'visible' }}>
                   {hours.map((hour, hourIndex) => (
-                      <div key={hour} className="grid grid-cols-5 hover:bg-gray-50 transition-colors relative" data-hour-row={hour}>
+                      <div key={hour} className="grid grid-cols-3 sm:grid-cols-5 hover:bg-gray-50 transition-colors relative" data-hour-row={hour}>
                           <div className="p-1 sm:p-2 text-center text-[10px] sm:text-sm text-gray-500 font-mono border-r flex items-center justify-center">
                               {hour.toString().padStart(2, '0')}:00
                           </div>
-                          {COURTS.map((court, courtIndex) => {
+                          {/* Mobile: Show only selected group */}
+                          {(mobileCourtGroup === 1 ? COURTS.slice(0, 2) : COURTS.slice(2, 4)).map((court, courtIndex) => {
                               // Add data attribute to first cell for height measurement
                               const isFirstCell = hourIndex === 0 && courtIndex === 0;
                               const booking = getBooking(court.id, hour);
@@ -694,6 +731,183 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ currentUser })
                                       )}
                                   </div>
                               );
+                          })}
+                          {/* Desktop: Show all courts (hidden on mobile) */}
+                          {COURTS.map((court, courtIndex) => {
+                                  const booking = getBooking(court.id, hour);
+                                  const blockInfo = getBookingBlockInfo(court.id, hour);
+                                  const isMyBooking = booking?.userId === currentUser.id;
+                                  const canModify = isMyBooking || currentUser.role === UserRole.ADMIN;
+                                  const isMovingThis = moveSourceBooking?.id === booking?.id;
+                                  const typeConfig = booking ? BOOKING_TYPES_CONFIG[booking.type] : null;
+                                  
+                                  const cellClass = booking
+                                      ? `${typeConfig?.color} border` 
+                                      : `border-dashed border-transparent ${moveSourceBooking ? 'hover:bg-blue-100 cursor-pointer animate-pulse' : 'hover:bg-tennis-50 hover:border-tennis-300'}`;
+
+                                  const isMobileDesktop = typeof window !== 'undefined' && window.innerWidth < 640;
+                                  const rowHeightDataDesktop = isMobileDesktop ? rowHeight.mobile : rowHeight.desktop;
+                                  const blockTotalHeightDesktop = blockInfo.isBlock && blockInfo.isFirstHour 
+                                    ? rowHeightDataDesktop.firstRow + (blockInfo.blockLength - 1) * rowHeightDataDesktop.rowSpacing
+                                    : 0;
+
+                                  return (
+                                      <div key={`desktop-${court.id}`} className="hidden sm:block p-0.5 sm:p-1 border-r last:border-r-0 relative h-16 sm:h-20">
+                                          {blockInfo.isBlock && blockInfo.isFirstHour ? (
+                                              <div
+                                                  style={{
+                                                      position: 'absolute',
+                                                      top: 0,
+                                                      left: 0,
+                                                      right: 0,
+                                                      height: `${blockTotalHeightDesktop}px`,
+                                                      zIndex: 10
+                                                  }}
+                                                  className={`rounded p-1 text-[10px] sm:text-xs relative group shadow-sm overflow-hidden ${cellClass} ${isMovingThis ? 'opacity-50' : ''}`}
+                                              >
+                                                  <div className="leading-tight mb-4">
+                                                      <div className="font-bold truncate">
+                                                          {typeConfig?.label} {booking.vmType ? `(${booking.vmType === VMType.SINGLES ? 'E' : booking.vmType === VMType.DOUBLES ? 'D' : 'M'})` : ''}
+                                                      </div>
+                                                      <div className="truncate opacity-90">
+                                                          {booking.userName}
+                                                          {booking.partner && <span className="block truncate text-[9px]">+ {booking.partner}</span>}
+                                                      </div>
+                                                      {booking.opponent && booking.type === BookingType.VM && (
+                                                          <div className="truncate text-gray-600 mt-0.5 italic text-[9px]">
+                                                              vs. {booking.opponent}
+                                                          </div>
+                                                      )}
+                                                      {booking.opponent && booking.type === BookingType.MATCH && (
+                                                          <div className="truncate text-gray-600 mt-0.5 italic text-[9px]">
+                                                              Gegner: {booking.opponent}
+                                                          </div>
+                                                      )}
+                                                      {booking.duration && booking.duration > 1 && (
+                                                          <div className="text-[9px] text-gray-500 mt-0.5">
+                                                              ({booking.duration}h)
+                                                          </div>
+                                                      )}
+                                                      {booking.description && (
+                                                          <div className="truncate text-gray-700 mt-0.5 font-medium text-[9px]">
+                                                              {booking.description}
+                                                          </div>
+                                                      )}
+                                                  </div>
+                                                  
+                                                  {canModify && !moveSourceBooking && (
+                                                      <div className="absolute bottom-0.5 right-0.5 flex space-x-0.5 sm:space-x-1 z-20">
+                                                          <button 
+                                                              onClick={(e) => { e.stopPropagation(); openEditModal(booking); }}
+                                                              className="bg-white text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
+                                                              title="Bearbeiten"
+                                                              aria-label="Bearbeiten"
+                                                          >
+                                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                              </svg>
+                                                          </button>
+                                                          <button 
+                                                              onClick={(e) => { e.stopPropagation(); initMove(booking); }}
+                                                              className="bg-white text-blue-700 hover:text-blue-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
+                                                              title="Verschieben"
+                                                              aria-label="Verschieben"
+                                                          >
+                                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" transform="rotate(45 10 10)" />
+                                                              </svg>
+                                                          </button>
+                                                          <button 
+                                                              onClick={(e) => {
+                                                                  e.stopPropagation();
+                                                                  handleCancel(booking.id);
+                                                              }}
+                                                              className="bg-white text-red-700 hover:text-red-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
+                                                              title="Stornieren"
+                                                              aria-label="Stornieren"
+                                                          >
+                                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                              </svg>
+                                                          </button>
+                                                      </div>
+                                                  )}
+                                              </div>
+                                          ) : booking ? (
+                                              <div className={`w-full h-full rounded p-1 text-[10px] sm:text-xs relative group shadow-sm overflow-hidden ${cellClass} ${isMovingThis ? 'opacity-50' : ''}`}>
+                                                  <div className="leading-tight mb-4">
+                                                      <div className="font-bold truncate">
+                                                          {typeConfig?.label} {booking.vmType ? `(${booking.vmType === VMType.SINGLES ? 'E' : booking.vmType === VMType.DOUBLES ? 'D' : 'M'})` : ''}
+                                                      </div>
+                                                      <div className="truncate opacity-90">
+                                                          {booking.userName}
+                                                          {booking.partner && <span className="block truncate text-[9px]">+ {booking.partner}</span>}
+                                                      </div>
+                                                      {booking.opponent && booking.type === BookingType.VM && (
+                                                          <div className="truncate text-gray-600 mt-0.5 italic text-[9px]">
+                                                              vs. {booking.opponent}
+                                                          </div>
+                                                      )}
+                                                      {booking.opponent && booking.type === BookingType.MATCH && (
+                                                          <div className="truncate text-gray-600 mt-0.5 italic text-[9px]">
+                                                              Gegner: {booking.opponent}
+                                                          </div>
+                                                      )}
+                                                      {booking.description && (
+                                                          <div className="truncate text-gray-700 mt-0.5 font-medium text-[9px]">
+                                                              {booking.description}
+                                                          </div>
+                                                      )}
+                                                  </div>
+                                                  
+                                                  {canModify && !moveSourceBooking && (
+                                                      <div className="absolute bottom-0.5 right-0.5 flex space-x-0.5 sm:space-x-1 z-20">
+                                                          <button 
+                                                              onClick={(e) => { e.stopPropagation(); openEditModal(booking); }}
+                                                              className="bg-white text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
+                                                              title="Bearbeiten"
+                                                              aria-label="Bearbeiten"
+                                                          >
+                                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                              </svg>
+                                                          </button>
+                                                          <button 
+                                                              onClick={(e) => { e.stopPropagation(); initMove(booking); }}
+                                                              className="bg-white text-blue-700 hover:text-blue-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
+                                                              title="Verschieben"
+                                                              aria-label="Verschieben"
+                                                          >
+                                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" transform="rotate(45 10 10)" />
+                                                              </svg>
+                                                          </button>
+                                                          <button 
+                                                              onClick={(e) => {
+                                                                  e.stopPropagation();
+                                                                  handleCancel(booking.id);
+                                                              }}
+                                                              className="bg-white text-red-700 hover:text-red-900 border border-gray-200 shadow-sm font-medium p-1.5 sm:p-1 rounded hover:bg-gray-50 transition-colors touch-manipulation"
+                                                              title="Stornieren"
+                                                              aria-label="Stornieren"
+                                                          >
+                                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                              </svg>
+                                                          </button>
+                                                      </div>
+                                                  )}
+                                              </div>
+                                          ) : (
+                                              <button 
+                                                  onClick={() => openBookingModal(court.id, hour)}
+                                                  className={`w-full h-full rounded border-2 flex items-center justify-center text-xs transition-all ${cellClass} ${moveSourceBooking ? 'text-blue-400 font-bold' : 'text-transparent hover:text-tennis-400'}`}
+                                              >
+                                                  {moveSourceBooking ? 'Hier' : '+'}
+                                              </button>
+                                          )}
+                                      </div>
+                                  );
                           })}
                       </div>
                   ))}
