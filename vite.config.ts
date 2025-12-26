@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
         console.warn('Could not load .env files, using defaults');
     }
     return {
+      base: process.env.NODE_ENV === 'production' ? '/STV-Ringelheim-Platzbuchung/' : '/',
       server: {
         port: 3000,
         host: '0.0.0.0',
